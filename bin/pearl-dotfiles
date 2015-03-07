@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+#
+# This file is part of Pearl (https://github.com/fsquillace/pearl).
+#
+# Copyright (c) 2008-2015
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Library General Public License as published
+# by the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+if [ -z "$PEARL_ROOT" ]
+then
+	echo "Error: The script cannot be executed outside the Pearl environment"
+	exit 1
+fi
+
+NAME='Pearl Dotfiles'
+CMD='pearl-dotfiles'
+DESCRIPTION='The Pearl dotfiles script'
+AUTHOR='Filippo Squillace <feel dot squally at gmail.com>'
+HOMEPAGE='https://github.com/fsquillace/pearl-dotfiles'
+COPYRIGHT='2008-2015'
+
+source "${PEARL_ROOT}/lib/utils.sh"
+source "$(dirname $0)/../lib/dotfile.sh"
+
+###################################
+### General functions           ###
+###################################
+
+usage() {
+    echo -e "$NAME: $DESCRIPTION"
+    echo -e "Usage: $CMD [options] [command] [dotfiles...]"
+    echo -e "Commands:"
+    echo -e "  enable                   Enable the dotfiles"
+    echo -e "  disable                  Disable the dotfiles"
+    echo -e "  list                     List all the dotfiles"
+	echo
+    echo -e "Options:"
+    echo -e "  -h, --help               Show this help message"
+}
+
+check_cli(){
+    if $OPT_HELP
+    then
+        if $COMMAND_DOTFILE_ENABLE || $COMMAND_DOTFILE_DISABLE
+        then
+            die "The help option must be used exclusively"
+        fi
+    fi
+    if $COMMAND_DOTFILE_ENABLE
+    then
+        if $OPT_HELP || $COMMAND_DOTFILE_DISABLE
+        then
+            die "The enable option must be used exclusively"
+        fi
+    fi
+    if $COMMAND_DOTFILE_DISABLE
+    then
+        if $OPT_HELP || $COMMAND_DOTFILE_ENABLE
+        then
+            die "The help disable must be used exclusively"
+        fi
+    fi
+    if [ "$ARGS" != "" ]
+    then
+        die "No arguments are needed. For the CLI syntax run: $CMD --help"
+    fi
+
+    return 0
+}
+
+
+function parse_arguments(){
+    COMMAND_DOTFILE_ENABLE=false
+    COMMAND_DOTFILE_DISABLE=false
+    COMMAND_DOTFILE_LIST=false
+	OPT_HELP=false
+	COMMAND_ARGS=()
+
+	for opt in "$@"
+	do
+		case "$1" in
+			enable)
+				COMMAND_DOTFILE_ENABLE=true; shift ; COMMAND_ARGS=("$@") ; shift ${#} ;;
+			disable)
+				COMMAND_DOTFILE_DISABLE=true; shift ; COMMAND_ARGS=("$@") ; shift ${#} ;;
+
+			list)
+				COMMAND_DOTFILE_LIST=true; shift ;;
+
+			-h|--help) OPT_HELP=true ; shift ;;
+
+			--) shift ; break ;;
+			-*) die "Invalid option $1" ;;
+			*) break ;;
+		esac
+	done
+
+	ARGS=()
+	for arg in "$@"
+	do
+		ARGS+=("$arg")
+	done
+}
+
+function execute_operation(){
+	$OPT_HELP && usage && return
+
+	$COMMAND_DOTFILE_LIST && pearl_dotfile_list && return
+
+	if $COMMAND_DOTFILE_ENABLE; then
+		for module in ${COMMAND_ARGS[@]}
+		do
+		    pearl_dotfile_enable "$module"
+		done
+	elif $COMMAND_DOTFILE_DISABLE; then
+		for module in ${COMMAND_ARGS[@]}
+		do
+		    pearl_dotfile_disable "$module"
+		done
+	fi
+
+	source_pearl
+}
+
+function source_pearl(){
+	# Send signal to parent in order to (re)source pearl
+    [ -z "$PEARL_ROOT" ] || kill -USR1 $PPID
+}
+
+parse_arguments "$@"
+check_cli
+execute_operation
+# vim: set ts=4 sw=4 noet:

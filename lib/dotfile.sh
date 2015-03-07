@@ -16,23 +16,7 @@ liquidprompt:source \"$PEARL_ROOT/mods/pearl/dotfiles/etc/liquidprompt/liquidpro
 gitconfig:[include] path = \"$PEARL_ROOT/mods/pearl/dotfiles/etc/git/gitconfig\":$HOME/.gitconfig
 gitignore:[core] excludesfile = $PEARL_ROOT/mods/pearl/dotfiles/etc/git/gitignore:$HOME/.gitconfig"
 
-function pearl_config_enable(){
-    function up_help(){
-        echo "Usage: pearl_config_enable <configname>"
-        echo "Enable the config"
-    }
-
-    if [ ${#@} -ne 1 ]; then
-        echo "pearl_config_enable: unrecognized options '$@'"
-        up_help
-        return 128
-    fi
-
-    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        up_help
-        return 0
-    fi
-
+function pearl_dotfile_enable(){
     local configname="$1"
 
     while read -r line; do
@@ -50,23 +34,7 @@ function pearl_config_enable(){
     return 1
 }
 
-function pearl_config_disable(){
-    function up_help(){
-        echo "Usage: pearl_config_disable <configname>"
-        echo "Disable the config"
-    }
-
-    if [ ${#@} -ne 1 ]; then
-        echo "pearl_config_disable: unrecognized options '$@'"
-        up_help
-        return 128
-    fi
-
-    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        up_help
-        return 0
-    fi
-
+function pearl_dotfile_disable(){
     local configname="$1"
 
     while read -r line; do
@@ -85,7 +53,7 @@ function pearl_config_disable(){
 }
 
 
-function pearl_config_list(){
+function pearl_dotfile_list(){
     while read -r line; do
         local conf=$(echo $line | awk -F : '{print $1}')
         local confline=$(echo "$line" | awk -F : '{print $2}')

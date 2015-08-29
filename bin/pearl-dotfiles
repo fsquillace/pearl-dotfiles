@@ -27,7 +27,7 @@ fi
 NAME='Pearl Dotfiles'
 CMD='pearl-dotfiles'
 DESCRIPTION='The Pearl dotfiles script'
-AUTHOR='Filippo Squillace <feel dot squally at gmail.com>'
+AUTHOR='Filippo Squillace <feel dot sqoox at gmail.com>'
 HOMEPAGE='https://github.com/fsquillace/pearl-dotfiles'
 COPYRIGHT='2008-2015'
 

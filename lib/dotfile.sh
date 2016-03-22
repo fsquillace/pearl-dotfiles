@@ -60,7 +60,7 @@ function pearl_dotfile_list(){
         local conffile=$(echo "$line" | awk -F : '{print $3}')
 
         local enabled=""
-        is_applied "$confline" "$conffile" && enabled="[enabled]"
+        is_applied "$confline" "$conffile" 2> /dev/null && enabled="[enabled]"
         echo "$conf $enabled"
 
     done <<< "$PEARL_CONFIGS"
